@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
-  const { error } = await requireAdmin();
+export async function GET(req: NextRequest) {
+  const { error } = await requireAdmin(req);
   if (error) return error;
 
   const rewards = await prisma.reward.findMany({ orderBy: { createdAt: "desc" } });
@@ -11,7 +11,7 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(req);
   if (error) return error;
 
   const body = await req.json();

@@ -10,15 +10,15 @@ const ALLOWED_KEYS = [
   "DAILY_CHAT_BONUS_LIMIT",
 ];
 
-export async function GET() {
-  const { error } = await requireAdmin();
+export async function GET(req: NextRequest) {
+  const { error } = await requireAdmin(req);
   if (error) return error;
   const config = await getPointsConfig();
   return NextResponse.json({ config });
 }
 
 export async function PUT(req: NextRequest) {
-  const { error } = await requireAdmin();
+  const { error } = await requireAdmin(req);
   if (error) return error;
 
   const body = await req.json();

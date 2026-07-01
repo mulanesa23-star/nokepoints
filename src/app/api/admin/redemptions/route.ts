@@ -1,9 +1,9 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/prisma";
 
-export async function GET() {
-  const { error } = await requireAdmin();
+export async function GET(req: NextRequest) {
+  const { error } = await requireAdmin(req);
   if (error) return error;
 
   const redemptions = await prisma.rewardRedemption.findMany({

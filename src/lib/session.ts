@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import crypto from "crypto";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
 export interface SessionData {
   userId?: string;
@@ -34,7 +35,21 @@ function verify(signed: string): string | null {
   return data;
 }
 
-export async function getSession(): Promise<SessionData> {
+export async function getSession(req?: NextRequest): Promise<SessionData> {
+  if (req) {
+    const headerToken = req.headers.get("X-Session-Token");
+    if (headerToken) {
+      const json = verify(headerToken);
+      if (json) {
+        try {
+          return JSON.parse(json);
+        } catch {
+          // fall through to cookie check
+        }
+      }
+    }
+  }
+
   const cookieStore = await cookies();
   const raw = cookieStore.get(COOKIE_NAME)?.value;
   if (!raw) return {};
@@ -55,7 +70,7 @@ export function setSessionCookie(res: NextResponse, data: SessionData): void {
   res.cookies.set(COOKIE_NAME, signed, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 60 * 60 * 24 * 30,
     path: "/",
   });
@@ -65,7 +80,7 @@ export function clearSessionCookie(res: NextResponse): void {
   res.cookies.set(COOKIE_NAME, "", {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "none",
     maxAge: 0,
     path: "/",
   });

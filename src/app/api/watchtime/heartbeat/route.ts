@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { calcWatchtimePoints } from "@/lib/points";
 
 export async function POST(req: NextRequest) {
-  const session = await getSession();
+  const session = await getSession(req);
   if (!session.userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }

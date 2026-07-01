@@ -1,9 +1,10 @@
 import { getSession } from "./session";
 import { prisma } from "./prisma";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export async function requireAdmin() {
-  const session = await getSession();
+export async function requireAdmin(req?: NextRequest) {
+  const session = await getSession(req);
   if (!session.userId) {
     return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
