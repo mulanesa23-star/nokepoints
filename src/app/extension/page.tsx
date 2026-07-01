@@ -42,7 +42,7 @@ export default async function ExtensionPage() {
           {session.userId ? (
             <div className="inline-flex items-center gap-1.5 bg-kick/10 text-kick text-xs font-semibold px-4 py-1.5 rounded-full border border-kick/20">
               <span className="w-2 h-2 rounded-full bg-kick" />
-              Conectado
+              Sesión activa
             </div>
           ) : (
             <Link

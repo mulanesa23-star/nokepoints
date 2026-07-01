@@ -5,7 +5,8 @@ import { getOAuthUrl, generateCodeChallenge } from "@/lib/kick-api";
 
 export async function GET(req: NextRequest) {
   const mode = req.nextUrl.searchParams.get("mode");
-  const state = crypto.randomBytes(32).toString("hex") + (mode === "popup" ? "_popup" : "");
+  const suffix = mode === "popup" ? "_popup" : mode === "extension" ? "_ext" : "";
+  const state = crypto.randomBytes(32).toString("hex") + suffix;
   const codeVerifier = crypto.randomBytes(64).toString("hex");
   const codeChallenge = generateCodeChallenge(codeVerifier);
 

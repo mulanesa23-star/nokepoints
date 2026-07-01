@@ -15,7 +15,7 @@ const SESSION_KEY =
   "complex_password_at_least_32_characters_long_for_security";
 const COOKIE_NAME = "nokepoints-session";
 
-function sign(data: string): string {
+export function sign(data: string): string {
   const hmac = crypto.createHmac("sha256", SESSION_KEY).update(data).digest("hex");
   return `${data}.${hmac}`;
 }

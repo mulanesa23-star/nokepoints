@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { exchangeCode, getKickUser } from "@/lib/kick-api";
 import { prisma } from "@/lib/prisma";
-import { setSessionCookie } from "@/lib/session";
+import { setSessionCookie, sign } from "@/lib/session";
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -19,7 +19,8 @@ export async function GET(req: NextRequest) {
   const codeVerifier = cookieStore.get("oauth_code_verifier")?.value;
 
   const isPopup = state.endsWith("_popup");
-  const cleanState = isPopup ? state.slice(0, -6) : state;
+  const isExtension = !isPopup && state.endsWith("_ext");
+  const cleanState = isPopup ? state.slice(0, -6) : isExtension ? state.slice(0, -4) : state;
 
   if (!savedState || savedState !== cleanState) {
     return NextResponse.redirect(new URL("/?error=invalid_state", req.url));
@@ -32,8 +33,8 @@ export async function GET(req: NextRequest) {
   cookieStore.delete("oauth_code_verifier");
 
   try {
-    const token = await exchangeCode(code, codeVerifier);
-    const kickUser = await getKickUser(token.access_token);
+    const accessToken = await exchangeCode(code, codeVerifier);
+    const kickUser = await getKickUser(accessToken.access_token);
 
     const adminUsername = process.env.ADMIN_KICK_USERNAME;
     const role = adminUsername && kickUser.name.toLowerCase() === adminUsername.toLowerCase() ? "admin" : "user";
@@ -53,14 +54,22 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const redirectPath = isPopup ? "/auth/connected" : "/dashboard";
-    const res = NextResponse.redirect(new URL(redirectPath, req.url));
-    setSessionCookie(res, {
+    const sessionData = {
       userId: user.id,
       kickId: user.kickId,
       kickUsername: user.kickUsername,
       kickAvatar: user.kickAvatar ?? undefined,
-    });
+    };
+
+    if (isExtension) {
+      const signed = sign(JSON.stringify(sessionData));
+      const redirectUrl = new URL("/auth/extension-done", req.url);
+      redirectUrl.searchParams.set("token", signed);
+      return NextResponse.redirect(redirectUrl);
+    }
+
+    const res = NextResponse.redirect(new URL(isPopup ? "/auth/connected" : "/dashboard", req.url));
+    setSessionCookie(res, sessionData);
     return res;
   } catch (err) {
     console.error("[auth] OAuth callback error:", err);
