@@ -18,10 +18,11 @@ function ExtensionDoneContent() {
       window.dispatchEvent(event);
 
       // Also try direct extension communication as backup (for older Chrome versions)
-      if (window.chrome?.runtime?.sendMessage) {
-        chrome.runtime.sendMessage(
+      const chromeExt = (window as any).chrome;
+      if (chromeExt?.runtime?.sendMessage) {
+        chromeExt.runtime.sendMessage(
           { action: "storeToken", token },
-          (response) => {
+          (response: any) => {
             if (response?.success) {
               console.log("Token stored in extension");
             }
