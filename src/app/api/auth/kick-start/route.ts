@@ -6,12 +6,13 @@ import { getOAuthUrl, generateCodeChallenge } from "@/lib/kick-api";
 export async function GET(req: NextRequest) {
   const mode = req.nextUrl.searchParams.get("mode");
   const suffix = mode === "popup" ? "_popup" : mode === "extension" ? "_ext" : "";
-  const state = crypto.randomBytes(32).toString("hex") + suffix;
+  const cleanState = crypto.randomBytes(32).toString("hex");
+  const state = cleanState + suffix;
   const codeVerifier = crypto.randomBytes(64).toString("hex");
   const codeChallenge = generateCodeChallenge(codeVerifier);
 
   const cookieStore = await cookies();
-  cookieStore.set("oauth_state", state, {
+  cookieStore.set("oauth_state", cleanState, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     maxAge: 60 * 10,
