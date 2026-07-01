@@ -1,0 +1,90 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  kickId       Int      @unique
+  kickUsername String
+  kickAvatar   String?
+  isSubscriber Boolean  @default(false)
+  points       Int      @default(0)
+  totalEarned  Int      @default(0)
+  role         String   @default("user")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  watchtimeSessions WatchtimeSession[]
+  transactions      PointsTransaction[]
+  chatMessages      ChatMessage[]
+  redemptions       RewardRedemption[]
+}
+
+model WatchtimeSession {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  startedAt     DateTime
+  endedAt       DateTime?
+  durationSec   Int      @default(0)
+  channel       String
+  pointsAwarded Int      @default(0)
+  createdAt     DateTime @default(now())
+}
+
+model PointsTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  amount    Int
+  type      String
+  reference String?
+  note      String?
+  createdAt DateTime @default(now())
+}
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  messageId String   @unique
+  channel   String
+  createdAt DateTime @default(now())
+}
+
+model Config {
+  id    String @id
+  value String
+}
+
+model Reward {
+  id          String   @id @default(cuid())
+  name        String
+  description String
+  imageUrl    String?
+  category    String   @default("digital")
+  pointCost   Int
+  stock       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  redemptions RewardRedemption[]
+}
+
+model RewardRedemption {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  rewardId    String
+  reward      Reward   @relation(fields: [rewardId], references: [id])
+  status      String   @default("pending")
+  fulfilledAt DateTime?
+  note        String?
+  createdAt   DateTime @default(now())
+}

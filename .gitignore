@@ -1,0 +1,9 @@
+# Bloquea la carpeta de compilación local
+.next/
+out/
+
+# Bloquea las dependencias (Vercel las instalará por su cuenta)
+node_modules/
+
+# Bloquea tus variables de entorno locales (¡Por seguridad!)
+.env*.local

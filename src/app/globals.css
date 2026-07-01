@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+
+body {
+  @apply bg-noke-dark text-white font-sans;
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-kick to-purple-400 bg-clip-text text-transparent;
+}
+
+.glow {
+  box-shadow: 0 0 20px rgba(83, 252, 24, 0.15);
+}
+
+.card {
+  @apply bg-noke-card border border-white/5 rounded-xl p-6;
+}
