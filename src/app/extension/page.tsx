@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { getPointsConfig } from "@/lib/points";
+import { getSession } from "@/lib/session";
 
 export const dynamic = "force-dynamic";
 
@@ -13,6 +14,7 @@ async function getConfig() {
 
 export default async function ExtensionPage() {
   const cfg = await getConfig();
+  const session = await getSession();
   const ptsPerTick = cfg?.POINTS_PER_TICK ?? 100;
   const subMultiplier = cfg?.SUBSCRIBER_MULTIPLIER ?? 2;
   const tickInterval = cfg?.TICK_INTERVAL_MS ?? 120000;
@@ -31,9 +33,26 @@ export default async function ExtensionPage() {
           }}
         />
 
-        <div className="inline-flex items-center gap-2 bg-kick/10 text-kick text-xs font-semibold px-4 py-1.5 rounded-full mb-6 border border-kick/20">
-          <img src="/kick-green.svg" alt="" className="w-4 h-4" />
-          EXTENSIÓN
+        <div className="flex flex-wrap items-center gap-3 mb-6">
+          <div className="inline-flex items-center gap-2 bg-kick/10 text-kick text-xs font-semibold px-4 py-1.5 rounded-full border border-kick/20">
+            <img src="/kick-green.svg" alt="" className="w-4 h-4" />
+            EXTENSIÓN
+          </div>
+
+          {session.userId ? (
+            <div className="inline-flex items-center gap-1.5 bg-kick/10 text-kick text-xs font-semibold px-4 py-1.5 rounded-full border border-kick/20">
+              <span className="w-2 h-2 rounded-full bg-kick" />
+              Conectado
+            </div>
+          ) : (
+            <Link
+              href="/api/auth/kick-start"
+              className="inline-flex items-center gap-1.5 bg-yellow-500/10 text-yellow-400 text-xs font-semibold px-4 py-1.5 rounded-full border border-yellow-500/20 hover:bg-yellow-500/20 transition"
+            >
+              <span className="w-2 h-2 rounded-full bg-yellow-400" />
+              Pendiente — Conectar con Kick
+            </Link>
+          )}
         </div>
 
         <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight">

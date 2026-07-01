@@ -1,10 +1,11 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { cookies } from "next/headers";
 import { getOAuthUrl, generateCodeChallenge } from "@/lib/kick-api";
 
-export async function GET() {
-  const state = crypto.randomBytes(32).toString("hex");
+export async function GET(req: NextRequest) {
+  const mode = req.nextUrl.searchParams.get("mode");
+  const state = crypto.randomBytes(32).toString("hex") + (mode === "popup" ? "_popup" : "");
   const codeVerifier = crypto.randomBytes(64).toString("hex");
   const codeChallenge = generateCodeChallenge(codeVerifier);
 

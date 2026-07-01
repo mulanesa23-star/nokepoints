@@ -18,7 +18,10 @@ export async function GET(req: NextRequest) {
   const savedState = cookieStore.get("oauth_state")?.value;
   const codeVerifier = cookieStore.get("oauth_code_verifier")?.value;
 
-  if (!savedState || savedState !== state) {
+  const isPopup = state.endsWith("_popup");
+  const cleanState = isPopup ? state.slice(0, -6) : state;
+
+  if (!savedState || savedState !== cleanState) {
     return NextResponse.redirect(new URL("/?error=invalid_state", req.url));
   }
   if (!codeVerifier) {
@@ -50,7 +53,8 @@ export async function GET(req: NextRequest) {
       },
     });
 
-    const res = NextResponse.redirect(new URL("/dashboard", req.url));
+    const redirectPath = isPopup ? "/auth/connected" : "/dashboard";
+    const res = NextResponse.redirect(new URL(redirectPath, req.url));
     setSessionCookie(res, {
       userId: user.id,
       kickId: user.kickId,
